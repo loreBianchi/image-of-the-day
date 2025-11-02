@@ -3,8 +3,7 @@ import textwrap
 
 def generate_prompt(titles):
     """
-    Usa Ollama (es. Llama3) per trasformare i titoli delle notizie in un prompt artistico
-    di alta qualità per Stable Diffusion.
+    Use Ollama (e.g. Llama3) to transform news headlines into a high-quality artistic prompt for image generation.
     """
     system_prompt = textwrap.dedent("""
     You are an expert AI art director.
@@ -14,6 +13,10 @@ def generate_prompt(titles):
     Rules:
     - Write in English.
     - Describe a single cohesive artistic scene inspired by 5 random headlines combined.
+    - Remove any specific names, places, or real-world references.
+    - Remove violent, political, or sensitive content.
+    - Emphasize creativity and visual impact.                                    
+    - Use vivid, creative language to evoke strong imagery.
     - Focus on atmosphere, emotion, lighting, composition, and artistic style.
     - Use detailed visual language (colors, environment, subjects, mood).
     - Avoid mentioning real people, logos, or text.
@@ -30,7 +33,7 @@ def generate_prompt(titles):
     # Combine system + user prompt for clarity
     full_prompt = f"{system_prompt}\n\n{user_prompt}".strip()
 
-    # Esegui Ollama con il modello locale (es. llama3)
+    # Execute Ollama command
     try:
         result = subprocess.run(
             ["ollama", "run", "llama3", full_prompt],

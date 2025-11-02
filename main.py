@@ -1,29 +1,38 @@
 from modules.rss_reader import get_latest_titles
 from modules.prompt_generator import generate_prompt
 from modules.image_generator import generate_image
+from datetime import datetime
 # from modules.instagram import post_image
 from config import IMAGE_DIR
 import os
-import time
 
-def run():
-    print("Process started ... 🚀")
+def main():
+    # --- 1️⃣ Read news ---
     titles = get_latest_titles()
-    print("Titles 📰:\n - ", titles)
     if not titles:
-        print("No titles found in the RSS feed.")
+        print("⚠️ No news found in the RSS feed.")
         return
 
+    print("📰 News found:")
+    for t in titles:
+        print("-", t)
+
+    # --- 2️⃣ Generate artistic prompt ---
     prompt = generate_prompt(titles)
-    print("Prompt:", prompt)
+    print("\n🎭 Generated prompt:")
+    print(prompt)
 
-    timestamp = int(time.time())
-    filename = os.path.join(IMAGE_DIR, f"{titles[:20].replace(' ', '_')}{timestamp}.png")
-    generate_image(prompt, filename)
-    print("Image generated:", filename)
+    # --- 3️⃣ Generate image ---
+    output_dir = IMAGE_DIR
+    os.makedirs(output_dir, exist_ok=True)
+    filename = os.path.join(output_dir, f"news_art_{datetime.now().strftime('%Y%m%d')}.png")
 
-    # If you want to post on Instagram
-    # post_image(filename, caption=titles)
+    image_path = generate_image(prompt, filename)
+
+    if image_path:
+        print(f"\n✅ Daily image ready: {image_path}")
+    else:
+        print("❌ Error generating image.")
 
 if __name__ == "__main__":
-    run()
+    main()

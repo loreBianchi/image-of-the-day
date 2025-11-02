@@ -8,6 +8,5 @@ def get_latest_titles():
     # print("Voci trovate:", [entry.title for entry in feed.entries])
     if not feed.entries:
         return None
-    titles_list = [entry.title for entry in feed.entries]
-    titles = "\n - ".join(titles_list)
+    titles = [entry.title for entry in feed.entries]
     return titles
