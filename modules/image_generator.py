@@ -46,6 +46,9 @@ def generate_image(prompt, output_path, width=WIDTH, height=HEIGHT):
         with open(filename, "wb") as f:
             f.write(image_bytes)
 
+        with open(filename.replace(".png", ".txt"), "w") as f:
+            f.write(prompt)
+
         print(f"✅ Image generated: {filename}")
         return filename
 

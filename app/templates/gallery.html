@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI News Gallery</title>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- GLightbox CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100 font-sans">
+    <div class="container mx-auto py-8">
+      <h1 class="text-3xl font-bold mb-6 text-center">AI News Gallery</h1>
+
+      <!-- Filters -->
+      <div class="flex justify-center gap-4 mb-6">
+        <button onclick="filterModel('all')" class="px-4 py-2 bg-blue-500 text-white rounded">
+          All
+        </button>
+        <button
+          onclick="filterModel('Realistic')"
+          class="px-4 py-2 bg-green-500 text-white rounded"
+        >
+          Realistic
+        </button>
+        <button
+          onclick="filterModel('DreamShaper')"
+          class="px-4 py-2 bg-purple-500 text-white rounded"
+        >
+          DreamShaper
+        </button>
+        <button onclick="filterModel('Anime')" class="px-4 py-2 bg-pink-500 text-white rounded">
+          Anime
+        </button>
+      </div>
+
+      <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for img in images %}
+        <div class="item bg-white rounded shadow p-2" data-date="{{ img.date }}">
+          <!-- Lightbox links -->
+          <a href="{{ img.url }}" class="glightbox">
+            <img
+              src="{{ img.url }}"
+              alt="Generated Image"
+              class="w-full h-auto rounded"
+              loading="lazy"
+            />
+          </a>
+          <div class="mt-2 flex justify-between items-center text-sm text-gray-700">
+            <span>Date: {{ img.date }}</span>
+            <!-- Pulsante per modal prompt -->
+            <button
+              data-prompt='{{ img.prompt | e }}'
+              class="prompt-btn px-2 py-1 bg-blue-500 text-white rounded text-xs 
+                    hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              {% if not img.prompt or img.prompt|trim|length < 10 %}disabled{% endif %}>
+              Prompt
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div
+      id="promptModal"
+      class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center"
+    >
+      <div class="bg-white p-6 rounded-lg max-w-2xl max-h-[80vh] overflow-y-auto">
+        <h2 class="text-xl font-bold mb-4">Prompt</h2>
+        <pre id="promptModalContent" class="whitespace-pre-wrap text-gray-800 text-sm"></pre>
+        <button onclick="closePromptModal()" class="mt-4 px-4 py-2 bg-gray-700 text-white rounded">
+          Chiudi
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function filterModel(model) {
+        const items = document.querySelectorAll(".item");
+        items.forEach((item) => {
+          if (model === "all" || item.dataset.model === model) {
+            item.style.display = "block";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      }
+    </script>
+    <!-- GLightbox JS -->
+    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+    <script>
+      const lightbox = GLightbox({ selector: ".glightbox" });
+    </script>
+    <script>
+      function openModal(promptText) {
+        document.getElementById("modalContent").innerText = promptText;
+        document.getElementById("promptModal").classList.remove("hidden");
+      }
+
+      function closeModal() {
+        document.getElementById("promptModal").classList.add("hidden");
+      }
+
+      // --- PROMPT MODAL ---
+      document.querySelectorAll(".prompt-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const prompt = JSON.parse(btn.dataset.prompt); // decodifica JSON
+          openPromptModal(prompt);
+        });
+      });
+
+      function openPromptModal(promptText) {
+        const modal = document.getElementById("promptModal");
+        document.getElementById("promptModalContent").innerText = promptText;
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function closePromptModal() {
+        const modal = document.getElementById("promptModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    </script>
+  </body>
+</html>
