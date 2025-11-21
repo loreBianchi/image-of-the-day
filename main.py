@@ -1,12 +1,21 @@
 from modules.rss_reader import get_latest_titles
-from modules.prompt_generator import generate_prompt_gemini
-from modules.image_generator import generate_image
-from datetime import datetime
+from modules.prompt_generator import generate_prompt
+from modules.image_generator import generate_image_workers_ai
+from modules.utils import generate_unique_filename # <--- Importato da utils
 # from modules.instagram import post_image
 from config import IMAGE_DIR
 import os
+import sys
 
 def main():
+    print("🚀 Starting AI News Artist...")
+    
+    # Check crucial environment variables
+    if 'GEMINI_API_KEY' not in os.environ:
+        print("\n⚠️ WARNING: The GEMINI_API_KEY environment variable is not set. The script cannot make the API call.")
+        print("To use it, obtain an API key and set it before running the script.")
+        # We do not exit here because prompt generation does not occur, but execution continues if necessary.
+    
     # --- 1️⃣ Read news ---
     titles = get_latest_titles()
     if not titles:
@@ -17,36 +26,35 @@ def main():
     for t in titles:
         print("-", t)
 
-    if 'GEMINI_API_KEY' not in os.environ:
-        print("\n⚠️ ATTENZIONE: La variabile d'ambiente GEMINI_API_KEY non è impostata. Lo script non può eseguire la chiamata API.")
-        print("Per usarlo, ottieni una chiave API e impostala prima di eseguire lo script.")
+    # --- 2️⃣ Generate artistic prompt ---
+    prompt = generate_prompt(titles) # The function will internally handle the missing GEMINI_API_KEY case
+
+    if prompt:
+        print("\n🎭 Generated prompt:")
+        print("-" * 50)
+        print(prompt)
+        print("-" * 50)
     else:
-         # --- 2️⃣ Generate artistic prompt ---
-        prompt = generate_prompt_gemini(titles)
+        print("\n❌ Prompt generation failed.")
+        return
+    
+    # --- 3️⃣ Generate image ---
+    output_dir = IMAGE_DIR
+    
+    # Generate the file path using the centralized function in utils
+    image_path_to_save = generate_unique_filename(
+        base_dir=output_dir, 
+        base_name="news_art",
+        extension=".png"
+    )
 
-        if prompt:
-            print("\n🎭 Generated prompt:")
-            print("-" * 50)
-            print(prompt)
-            print("-" * 50)
-        else:
-            print("\n❌ La generazione del prompt non è riuscita.")
+    image_path = generate_image_workers_ai(prompt=prompt, output_path=image_path_to_save)
+    
+    if image_path:
+        print(f"\n✅ Daily image ready: {image_path}")
+    else:
+        print("❌ Error generating image.")        
 
-        # --- 3️⃣ Generate image ---
-        output_dir = IMAGE_DIR
-        os.makedirs(output_dir, exist_ok=True)
-        filename = os.path.join(output_dir, f"news_art_{datetime.now().strftime('%Y%m%d')}.png")
-
-        image_path = generate_image(prompt, filename)
-
-        if image_path:
-            print(f"\n✅ Daily image ready: {image_path}")
-        else:
-            print("❌ Error generating image.")
-
-
-            
 
 if __name__ == "__main__":
     main()
-    

@@ -5,7 +5,7 @@ from google.genai import types
 
 load_dotenv()
 
-def generate_prompt_gemini(titles):
+def generate_prompt(titles):
     """
     Usa l'API di Gemini (es. Gemini 2.5 Flash) per trasformare i titoli delle notizie 
     in un prompt artistico di alta qualità per la generazione di immagini.

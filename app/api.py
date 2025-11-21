@@ -1,11 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi import Request
 from pydantic import BaseModel
-from modules.rss_reader import get_latest_titles
-from modules.prompt_generator import generate_prompt
-from modules.image_generator import generate_image
 from datetime import datetime
 import json
 import os
@@ -22,30 +19,6 @@ class GenerateImageRequest(BaseModel):
     prompt: str = None          # o prompt custom
     width: int = 1024
     height: int = 1024
-
-@app.post("/generate")
-def generate_image_endpoint(request: GenerateImageRequest):
-    # --- 1️⃣ Ottieni prompt ---
-    if request.prompt:
-        prompt = request.prompt
-    elif request.feed_url:
-        titles = get_latest_titles(request.feed_url)
-        if not titles:
-            raise HTTPException(status_code=404, detail="No titles found in feed")
-        prompt = generate_prompt(titles)
-    else:
-        raise HTTPException(status_code=400, detail="Provide either feed_url or prompt")
-
-    # --- 2️⃣ Genera immagine ---
-    output_dir = "images"
-    os.makedirs(output_dir, exist_ok=True)
-    filename = os.path.join(output_dir, f"news_art_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-    
-    image_path = generate_image(prompt, filename, width=request.width, height=request.height)
-    if not image_path:
-        raise HTTPException(status_code=500, detail="Image generation failed")
-
-    return {"prompt": prompt, "image_path": image_path}
 
 @app.get("/")
 def read_root():
