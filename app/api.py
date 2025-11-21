@@ -4,76 +4,42 @@ from fastapi.templating import Jinja2Templates
 from fastapi import Request
 from datetime import datetime
 import json
-import os
 from dotenv import load_dotenv
+from modules.utils import load_gallery_metadata # Import the new R2 metadata loader
 
-# Load environment variables (essential if any template or setup relies on them)
+# Load environment variables (needed for R2 client config in utils)
 load_dotenv() 
 
 app = FastAPI(title="AI News Artist Gallery")
 
-# Define the directory where images are saved (relative to project root)
-IMAGE_DIR = "app/static/images"
-os.makedirs(IMAGE_DIR, exist_ok=True) 
-
-# Mount static files: /static URL maps to app/static directory
+# Define the directory for static assets (e.g., CSS/JS, not images)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
-
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the AI News Artist Gallery. View generated images at /gallery."}
+# Note: The /images directory is no longer needed as images are served from R2
 
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
 
-@app.get("/gallery")
+@app.get("/")
 def show_gallery(request: Request):
     """
-    Renders the gallery page by listing all PNG files and reading associated TXT prompts.
+    Frontend route. Fetches the gallery metadata from R2 and displays the images.
     """
+    
+    # Load the list of image metadata (ordered by recency in the JSON file)
+    images_data = load_gallery_metadata()
+
+    # Prepare data for template rendering
     images = []
-
-    try:
-        # List and sort files to show the newest first
-        files = sorted(os.listdir(IMAGE_DIR), reverse=True)
-    except FileNotFoundError:
-        return templates.TemplateResponse("gallery.html", {"request": request, "images": []})
-
-
-    for file in files:
-        if file.endswith(".png"):
-            # Attempt to extract date/time from the standardized filename format (news_art_YYYYMMDD_HHMMSS.png)
-            date = "Unknown Date"
-            prompt_text = "Prompt not found."
-            
-            try:
-                parts = file.split('_')
-                if len(parts) >= 3:
-                    date_str = parts[-2]
-                    time_str = parts[-1].split('.')[0]
-                    date_time = datetime.strptime(f"{date_str}_{time_str}", "%Y%m%d_%H%M%S")
-                    date = date_time.strftime("%d/%m/%Y %H:%M")
-            except Exception:
-                print("❌ Error parsing date from filename:", file)
-                # If parsing fails, use a default
-                pass
-
-            # Construct the path for the prompt file (.txt)
-            prompt_file = file.replace(".png", ".txt")
-            prompt_path = os.path.join(IMAGE_DIR, prompt_file)
-            
-            if os.path.exists(prompt_path):
-                with open(prompt_path, "r", encoding="utf-8") as f:
-                    prompt_text = f.read().strip()
-            
-            images.append({
-                # The URL path must point to the static file endpoint
-                "url": f"/static/images/{file}",
-                "prompt": json.dumps(prompt_text),
-                "date": date
-            })
+    for entry in images_data:
+        images.append({
+            "url": entry.get("image_url"),
+            "prompt": json.dumps(entry.get("prompt", "No prompt available")),
+            "date": datetime.fromisoformat(entry["timestamp"]).strftime("%d/%m/%Y %H:%M"),
+            # Include news titles for display/debugging
+            "news_titles": entry.get("news_titles", []) 
+        })
 
     return templates.TemplateResponse("gallery.html", {"request": request, "images": images})
