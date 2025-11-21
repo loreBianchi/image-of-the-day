@@ -13,9 +13,11 @@
   </head>
   <body class="bg-gray-100 font-sans">
     <div class="container mx-auto py-8">
-      <h1 class="text-3xl font-bold mb-6 text-center">AI News Gallery</h1>
+      <h1 class="text-3xl font-bold mb-6 text-center">Image Of The Day</h1>
+      <p class="text-center mb-6">Explore the latest AI-generated images from various models.</p>
 
       <!-- Filters -->
+      <!-- 
       <div class="flex justify-center gap-4 mb-6">
         <button onclick="filterModel('all')" class="px-4 py-2 bg-blue-500 text-white rounded">
           All
@@ -35,7 +37,7 @@
         <button onclick="filterModel('Anime')" class="px-4 py-2 bg-pink-500 text-white rounded">
           Anime
         </button>
-      </div>
+      </div> -->
 
       <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {% for img in images %}
