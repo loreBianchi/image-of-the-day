@@ -1,19 +1,15 @@
-import os
 import json
-from dotenv import load_dotenv
 from datetime import datetime
 from botocore.exceptions import ClientError
 import boto3
+from config import (
+    R2_ENDPOINT_URL,
+    R2_ACCESS_KEY_ID,
+    R2_SECRET_ACCESS_KEY,
+    R2_BUCKET_NAME,
+    GALLERY_METADATA_KEY
+)
 
-load_dotenv()
-
-# R2 Configuration (using S3-compatible Boto3 structure)
-R2_ENDPOINT_URL = os.getenv("R2_ENDPOINT_URL")
-R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID")
-R2_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY")
-R2_BUCKET_NAME = os.getenv("R2_BUCKET_NAME")
-
-GALLERY_METADATA_KEY = "gallery_data.json" # Central file for all metadata
 
 def get_s3_client():
     """Returns a configured Boto3 S3 client for R2."""
@@ -38,6 +34,7 @@ def generate_unique_filename(base_name="news_art", extension=".png"):
     """
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     return f"{base_name}_{timestamp}{extension}"
+
 
 def save_gallery_metadata(new_entry):
     """
@@ -85,6 +82,7 @@ def save_gallery_metadata(new_entry):
     except Exception as e:
         print(f"❌ Error saving metadata to R2: {e}")
         return False
+
 
 def load_gallery_metadata():
     """Fetches and returns the gallery metadata list from R2."""

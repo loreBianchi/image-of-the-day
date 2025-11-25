@@ -13,6 +13,14 @@ load_dotenv()
 
 
 def main():
+    """
+    Main function to run the daily AI Image of the Day job.
+    1. Reads latest news titles from RSS feed.
+    2. Generates an artistic prompt using Gemini API.
+    3. Generates an image via Cloudflare Workers AI and uploads it to R2.
+    4. Saves metadata to R2.
+    5. (Optional) Publishes the image on Instagram.
+    """
     print("🚀 Starting AI News Artist Daily Job...")
     
     # --- Pre-Requisites Check ---
