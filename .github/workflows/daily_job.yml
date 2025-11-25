@@ -1,0 +1,42 @@
+# GitHub Action to run a daily job that generates content using Gemini API
+name: Daily Content Generation
+
+# Trigger the workflow daily at midnight UTC and allow manual triggers
+on:
+  # 1. Trigger manual (useful for debugging)
+  workflow_dispatch:
+  # 2. Trigger scheduler (runs every day at midnight UTC)
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at 00:00 UTC
+
+jobs:
+  run_daily_script:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # =========================================================
+      # Run the Main Job
+      # =========================================================
+      - name: Run main script
+        run: python main.py
+        env:
+          # Make sure the variables are also available here
+          R2_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_MODEL_ID: ${{ secrets.CF_MODEL_ID }}
