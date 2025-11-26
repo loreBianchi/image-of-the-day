@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- RSS FEED CONFIGURATION ---
-RSS_FEED = "https://www.ansa.it/sito/notizie/mondo/mondo_rss.xml"
+RSS_FEED = "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"
 
 # --- CLOUDFLARE WORKERS AI CONFIGURATION ---
 CF_ACCOUNT_ID = os.getenv("CF_ACCOUNT_ID")
