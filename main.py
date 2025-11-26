@@ -7,6 +7,7 @@ from modules.rss_reader import get_latest_titles
 from modules.prompt_generator import generate_prompt
 from modules.image_generator import generate_image_workers_ai
 from modules.utils import save_gallery_metadata
+from config import RSS_FEED
 
 # Load environment variables IMMEDIATELY for all modules
 load_dotenv() 
@@ -66,7 +67,8 @@ def main():
         "timestamp": datetime.now().isoformat(),
         "prompt": prompt,
         "news_titles": titles,
-        "image_url": image_url
+        "image_url": image_url,
+        "source": RSS_FEED
     }
     
     if save_gallery_metadata(metadata_entry):
